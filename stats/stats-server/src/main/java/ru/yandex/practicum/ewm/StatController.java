@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.HitDto;
 import ru.practicum.dto.StatsDto;
-import ru.yandex.practicum.ewm.service.HitService;
+import ru.yandex.practicum.ewm.service.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,11 +18,11 @@ import java.util.List;
 @RequestMapping
 public class StatController {
 
-    private final HitService hitService;
+    private final StatsService statsService;
 
     @PostMapping("/hit")
     public ResponseEntity<String> saveHit(@RequestBody @Valid HitDto hitDto) {
-        hitService.save(hitDto);
+        statsService.save(hitDto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -36,6 +36,6 @@ public class StatController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
-        return hitService.getStats(start, end, uris, unique);
+        return statsService.getStats(start, end, uris, unique);
     }
 }

@@ -7,22 +7,22 @@ import ru.practicum.dto.HitDto;
 import ru.practicum.dto.StatsDto;
 import ru.yandex.practicum.ewm.mapper.Mapper;
 import ru.yandex.practicum.ewm.model.Hit;
-import ru.yandex.practicum.ewm.storage.HitRepository;
+import ru.yandex.practicum.ewm.storage.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class HitServiceImpl implements HitService {
+public class StatsServiceImpl implements StatsService {
 
-    private final HitRepository hitRepository;
+    private final StatsRepository statsRepository;
 
     @Override
     public void save(HitDto hitDto) {
         Hit hit = Mapper.toEntityHit(hitDto);
 
-        hitRepository.save(hit);
+        statsRepository.save(hit);
     }
 
     @Override
@@ -34,9 +34,9 @@ public class HitServiceImpl implements HitService {
         List<StatsDto> stats;
 
         if (unique) {
-            stats = hitRepository.findUniqueHitsByPeriodAndUris(start, end, uris);
+            stats = statsRepository.findUniqueHitsByPeriodAndUris(start, end, uris);
         } else {
-            stats = hitRepository.findAllHitsByPeriodAndUris(start, end, uris);
+            stats = statsRepository.findAllHitsByPeriodAndUris(start, end, uris);
         }
 
         return ResponseEntity.ok(stats);
