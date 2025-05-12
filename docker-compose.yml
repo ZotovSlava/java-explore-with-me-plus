@@ -43,7 +43,7 @@ services:
     image: postgres:16.1
     container_name: postgres-ewm-main-db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_PASSWORD=ewm
       - POSTGRES_USER=ewm

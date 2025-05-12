@@ -12,7 +12,6 @@ import java.io.StringWriter;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleException(final Exception e, HttpStatus status) {
