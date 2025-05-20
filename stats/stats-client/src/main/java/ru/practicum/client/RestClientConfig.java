@@ -8,9 +8,9 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class RestClientConfig {
     @Bean
-    public RestClient restClient(@Value("${stats.server-url}") String baseUrl) {
+    public RestClient restClient() {
         return RestClient.builder()
-                .baseUrl(baseUrl)
+                .baseUrl("http://localhost:9090")
                 .build();
     }
 }
