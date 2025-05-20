@@ -56,6 +56,28 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(EventNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleEventNotFound(EventNotFoundException ex) {
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.name(),
+                "The required object was not found.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
+    @ExceptionHandler(EventGetBadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleEventGetBadRequest(EventGetBadRequestException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.name(),
+                "Incorrectly made request.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
     @ExceptionHandler(CompilationNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleCompilationNotFound(CompilationNotFoundException ex) {

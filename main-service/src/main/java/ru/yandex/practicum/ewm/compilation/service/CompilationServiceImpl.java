@@ -11,6 +11,8 @@ import ru.yandex.practicum.ewm.compilation.dto.CompilationUpdateDto;
 import ru.yandex.practicum.ewm.compilation.mapper.CompilationMapper;
 import ru.yandex.practicum.ewm.compilation.model.Compilation;
 import ru.yandex.practicum.ewm.compilation.storage.CompilationRepository;
+import ru.yandex.practicum.ewm.event.model.Event;
+import ru.yandex.practicum.ewm.event.storage.EventRepository;
 import ru.yandex.practicum.ewm.exception.CompilationNotFoundException;
 
 import java.util.List;

@@ -3,7 +3,6 @@ package ru.yandex.practicum.ewm.event.model;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Data

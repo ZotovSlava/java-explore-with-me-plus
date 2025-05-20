@@ -1,21 +1,17 @@
 package ru.yandex.practicum.ewm.event;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.ewm.event.dto.*;
 import ru.yandex.practicum.ewm.event.model.PrivateEventParams;
-import ru.yandex.practicum.ewm.event.model.PublicEventParams;
 import ru.yandex.practicum.ewm.event.service.EventService;
+import ru.yandex.practicum.ewm.request.dto.RequestEventDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -80,15 +76,29 @@ public class EventPrivateController {
     }
 
     @GetMapping("/{userId}/events/{eventId}/requests")
-    public ResponseEntity<List<RequestsDto>> getAllRequests(@PathVariable("userId") Long userId,
-                                                @PathVariable("eventId") Long eventId) {
+    public ResponseEntity<List<RequestEventDto>> getAllRequests(@PathVariable("userId") Long userId,
+                                                                @PathVariable("eventId") Long eventId) {
         log.info("--> GET запрос /users/{}/events/{}/requests", userId, eventId);
-        List<RequestsDto> requests = eventService.getRequestsByIdPrivate(userId, eventId);
+        List<RequestEventDto> requests = eventService.getRequestsByIdPrivate(userId, eventId);
         log.info("<-- GET запрос /users/{}/events/{}/requests вернул ответ: {}", userId, eventId, requests);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requests);
+    }
+
+
+    @PatchMapping("/{userId}/events/{eventId}/requests")
+    public ResponseEntity<EventResultRequestStatusDto> update(@RequestBody @Valid EventUpdateRequestStatusDto updateDto,
+                                               @PathVariable("userId") Long userId,
+                                               @PathVariable("eventId") Long eventId) {
+        log.info("--> PATCH запрос /user/{}/events/{}/requests с телом {}", userId, eventId, updateDto);
+        EventResultRequestStatusDto result = eventService.updateRequestStatusPrivate(userId, eventId, updateDto);
+        log.info("<-- PATCH запрос /user/{}/events/{}/requests вернул ответ: {}", userId, eventId, result);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(result);
     }
 
 }

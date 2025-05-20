@@ -4,6 +4,7 @@ import ru.yandex.practicum.ewm.event.dto.*;
 import ru.yandex.practicum.ewm.event.model.AdminEventParams;
 import ru.yandex.practicum.ewm.event.model.PrivateEventParams;
 import ru.yandex.practicum.ewm.event.model.PublicEventParams;
+import ru.yandex.practicum.ewm.request.dto.RequestEventDto;
 
 import java.util.List;
 
@@ -23,4 +24,8 @@ public interface EventService {
         EventFullDto updatePrivate(Long userId, Long eventId, EventUpdateUserDto eventUpdateDto);
 
         EventFullDto create(Long userId, EventCreateDto eventDto);
+
+        List<RequestEventDto> getRequestsByIdPrivate(Long userId, Long eventId);
+
+        EventResultRequestStatusDto updateRequestStatusPrivate(Long userId, Long eventId, EventUpdateRequestStatusDto updateDto);
 }

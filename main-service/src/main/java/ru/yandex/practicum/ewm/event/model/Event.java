@@ -5,11 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.ewm.category.model.Category;
-import ru.yandex.practicum.ewm.user.dto.UserShortDto;
 import ru.yandex.practicum.ewm.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor

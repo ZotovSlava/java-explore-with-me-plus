@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.ewm.category.model.Category;
 import ru.yandex.practicum.ewm.event.model.EventStateAction;
 import ru.yandex.practicum.ewm.event.model.Location;
 

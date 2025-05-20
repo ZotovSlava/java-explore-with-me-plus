@@ -50,40 +50,38 @@ public class EventMapper {
     }
 
     public Event toEventFromUpdateAdmin(EventUpdateAdminDto eventDto, Category updCategory, Event curEvent) {
-        Category category = new Category();
-        category.setId(updCategory.getId());
-        category.setName(updCategory.getName());
 
-        curEvent.setAnnotation(eventDto.getAnnotation());
-        curEvent.setCategory(category);
-        curEvent.setDescription(eventDto.getDescription());
-        curEvent.setEventDate(eventDto.getEventDate());
-        curEvent.setLat(eventDto.getLocation().lat);
-        curEvent.setLon(eventDto.getLocation().lon);
-        curEvent.setPaid(eventDto.getPaid());
-        curEvent.setParticipantLimit(eventDto.getParticipantLimit());
+        if (eventDto.getAnnotation() != null) { curEvent.setAnnotation(eventDto.getAnnotation()); }
+        curEvent.setCategory(updCategory);
+        if (eventDto.getDescription() != null) { curEvent.setDescription(eventDto.getDescription()); }
+        if (eventDto.getEventDate() != null) { curEvent.setEventDate(eventDto.getEventDate()); }
+        if (eventDto.getLocation() != null) {
+            curEvent.setLat(eventDto.getLocation().lat);
+            curEvent.setLon(eventDto.getLocation().lon);
+        }
+        if (eventDto.getPaid() != null) { curEvent.setPaid(eventDto.getPaid()); }
+        if (eventDto.getParticipantLimit() != null) { curEvent.setParticipantLimit(eventDto.getParticipantLimit()); }
         if (eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT)) { curEvent.setState(EventState.PUBLISHED); }
         if (eventDto.getStateAction().equals(EventStateAction.REJECT_EVENT)) { curEvent.setState(EventState.CANCELED); }
-        curEvent.setTitle(eventDto.getTitle());
+        if (eventDto.getTitle() != null) { curEvent.setTitle(eventDto.getTitle()); }
 
         return curEvent;
     }
 
     public Event toEventFromUpdateUser(EventUpdateUserDto eventDto, Category updCategory, Event curEvent) {
-        Category category = new Category();
-        category.setId(updCategory.getId());
-        category.setName(updCategory.getName());
 
-        curEvent.setAnnotation(eventDto.getAnnotation());
-        curEvent.setCategory(category);
-        curEvent.setDescription(eventDto.getDescription());
-        curEvent.setEventDate(eventDto.getEventDate());
-        curEvent.setLat(eventDto.getLocation().lat);
-        curEvent.setLon(eventDto.getLocation().lon);
-        curEvent.setParticipantLimit(eventDto.getParticipantLimit());
+        if (eventDto.getAnnotation() != null) { curEvent.setAnnotation(eventDto.getAnnotation()); }
+        curEvent.setCategory(updCategory);
+        if (eventDto.getDescription() != null) { curEvent.setDescription(eventDto.getDescription()); }
+        if (eventDto.getEventDate() != null) { curEvent.setEventDate(eventDto.getEventDate()); }
+        if (eventDto.getLocation() != null) {
+            curEvent.setLat(eventDto.getLocation().lat);
+            curEvent.setLon(eventDto.getLocation().lon);
+        }
+        if (eventDto.getParticipantLimit() != null) { curEvent.setParticipantLimit(eventDto.getParticipantLimit()); }
         if (eventDto.getStateAction().equals(EventUserStateAction.SEND_TO_REVIEW)) { curEvent.setState(EventState.PENDING); }
         if (eventDto.getStateAction().equals(EventUserStateAction.CANCEL_REVIEW)) { curEvent.setState(EventState.PUBLISHED); }
-        curEvent.setTitle(eventDto.getTitle());
+        if (eventDto.getTitle() != null) { curEvent.setTitle(eventDto.getTitle()); }
 
         return curEvent;
     }
@@ -93,6 +91,7 @@ public class EventMapper {
         event.setAnnotation(eventDto.getAnnotation());
         event.setCategory(category);
         event.setDescription(eventDto.getDescription());
+        event.setCreatedOn(eventDto.getCreated());
         event.setEventDate(eventDto.getEventDate());
         event.setLat(eventDto.getLocation().lat);
         event.setLon(eventDto.getLocation().lon);
@@ -103,6 +102,7 @@ public class EventMapper {
         event.setTitle(eventDto.getTitle());
         event.setConfirmedRequests(0);
         event.setState(EventState.PENDING);
+        event.setViews(eventDto.getViews());
 
         return event;
     }

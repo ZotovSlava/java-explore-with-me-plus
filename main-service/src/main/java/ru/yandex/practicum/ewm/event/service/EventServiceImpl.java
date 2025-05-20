@@ -2,19 +2,13 @@ package ru.yandex.practicum.ewm.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.dto.HitDto;
-import ru.yandex.practicum.ewm.MainServer;
 import ru.yandex.practicum.ewm.category.model.Category;
 import ru.yandex.practicum.ewm.category.model.QCategory;
 import ru.yandex.practicum.ewm.category.storage.CategoryRepository;
@@ -27,6 +21,11 @@ import ru.yandex.practicum.ewm.exception.EventGetBadRequestException;
 import ru.yandex.practicum.ewm.exception.EventNotFoundException;
 import ru.practicum.client.StatRestClient;
 import ru.yandex.practicum.ewm.exception.UserNotFoundException;
+import ru.yandex.practicum.ewm.request.dto.RequestEventDto;
+import ru.yandex.practicum.ewm.request.mapper.RequestMapper;
+import ru.yandex.practicum.ewm.request.model.Request;
+import ru.yandex.practicum.ewm.request.model.RequestStatus;
+import ru.yandex.practicum.ewm.request.storage.RequestRepository;
 import ru.yandex.practicum.ewm.user.model.User;
 import ru.yandex.practicum.ewm.user.storage.UserRepository;
 
@@ -41,6 +40,7 @@ public class EventServiceImpl implements EventService {
     EventRepository eventRepository;
     CategoryRepository categoryRepository;
     UserRepository userRepository;
+    RequestRepository requestRepository;
     EventMapper mapper;
 
     StatRestClient statClient;
@@ -144,17 +144,22 @@ public class EventServiceImpl implements EventService {
         if (event.isEmpty()) {
             throw new EventNotFoundException(eventId);
         }
-        Optional<Category> category = categoryRepository.findById(eventDto.getCategory());
-        if (category.isEmpty()) {
-            throw new CategoryNotFoundException(eventDto.getCategory());
+        Optional<Category> category;
+        if (eventDto.getCategory() != null && eventDto.getCategory() != event.get().getCategory().getId()) {
+            category = categoryRepository.findById(eventDto.getCategory());
+            if (category.isEmpty()) {
+                throw new CategoryNotFoundException(eventDto.getCategory());
+            }
+        } else {
+            category = Optional.of(event.get().getCategory());
         }
-        if (eventDto.getEventDate().isBefore(event.get().getPublishedOn().minus(1, ChronoUnit.HOURS))) {
+        if (eventDto.getEventDate() != null && eventDto.getEventDate().isBefore(event.get().getPublishedOn().minus(1, ChronoUnit.HOURS))) {
             throw new DataIntegrityViolationException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
         }
-        if (eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT) && !event.get().getState().equals(EventState.PENDING)) {
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT) && !event.get().getState().equals(EventState.PENDING)) {
             throw new DataIntegrityViolationException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
-        if (eventDto.getStateAction().equals(EventStateAction.REJECT_EVENT) && event.get().getState().equals(EventState.PUBLISHED)) {
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventStateAction.REJECT_EVENT) && event.get().getState().equals(EventState.PUBLISHED)) {
             throw new DataIntegrityViolationException("Событие можно отклонить, только если оно еще не опубликовано");
         }
         Event updEvent = mapper.toEventFromUpdateAdmin(eventDto, category.get(), event.get());
@@ -172,9 +177,14 @@ public class EventServiceImpl implements EventService {
         if (event.isEmpty()) {
             throw new EventNotFoundException(eventId);
         }
-        Optional<Category> category = categoryRepository.findById(eventDto.getCategory());
-        if (category.isEmpty()) {
-            throw new CategoryNotFoundException(eventDto.getCategory());
+        Optional<Category> category;
+        if (eventDto.getCategory() != null && eventDto.getCategory() != event.get().getCategory().getId()) {
+            category = categoryRepository.findById(eventDto.getCategory());
+            if (category.isEmpty()) {
+                throw new CategoryNotFoundException(eventDto.getCategory());
+            }
+        } else {
+            category = Optional.of(event.get().getCategory());
         }
         if (event.get().getInitiator().getId() != userId) {
             throw new EventGetBadRequestException(eventId, userId);
@@ -203,6 +213,73 @@ public class EventServiceImpl implements EventService {
         Event event = mapper.toEventFromCreatedDto(eventDto, user.get(), category.get());
         event = eventRepository.save(event);
         return mapper.toEventFullDto(event);
+    }
+
+    @Override
+    public List<RequestEventDto> getRequestsByIdPrivate(Long userId, Long eventId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
+        Optional<Event> event = eventRepository.findById(eventId);
+        if (event.isEmpty()) {
+            throw new EventNotFoundException(eventId);
+        }
+        List<Request> requests = requestRepository.findAllByRequesterIdAndEventId(userId, eventId);
+        return requests.stream()
+                .map(RequestMapper::toEventRequestDto)
+                .toList();
+    }
+
+    @Override
+    public EventResultRequestStatusDto updateRequestStatusPrivate(Long userId, Long eventId, EventUpdateRequestStatusDto updateDto) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
+        Optional<Event> event = eventRepository.findById(eventId);
+        if (event.isEmpty()) {
+            throw new EventNotFoundException(eventId);
+        }
+        Integer confReqs = event.get().getConfirmedRequests();
+        Integer limit = event.get().getParticipantLimit();
+        if (limit == 0 || !event.get().getRequestModeration()) {
+            return null;
+        }
+        if (confReqs == limit && updateDto.getStatus().equals(RequestStatus.CONFIRMED)) {
+            throw new DataIntegrityViolationException("The participant limit has been reached");
+        }
+        int count = limit - confReqs;
+        int counter = 0;
+        List<Request> requests = requestRepository.findAllByEventIdAndIdIn(eventId, updateDto.getRequestIds());
+        List<RequestEventDto> confirmedRequests = new ArrayList<>();
+        List<RequestEventDto> rejectedRequests = new ArrayList<>();
+        for (Request request : requests) {
+            if (!request.getStatus().equals(RequestStatus.PENDING)) {
+                throw new DataIntegrityViolationException("Request must have status PENDING");
+            }
+            if (updateDto.getStatus().equals(RequestStatus.CONFIRMED) && counter < count) {
+                counter++;
+                Request updRequest = request;
+                updRequest.setStatus(RequestStatus.CONFIRMED);
+                requestRepository.save(updRequest);
+                RequestEventDto requestDto = RequestMapper.toEventRequestDto(request);
+                confirmedRequests.add(requestDto);
+            } else {
+                Request updRequest = request;
+                updRequest.setStatus(RequestStatus.CANCELED);
+                requestRepository.save(updRequest);
+                RequestEventDto requestDto = RequestMapper.toEventRequestDto(request);
+                rejectedRequests.add(requestDto);
+            }
+        }
+        event.get().setConfirmedRequests(confReqs + counter);
+        eventRepository.save(event.get());
+
+        EventResultRequestStatusDto results = new EventResultRequestStatusDto();
+        results.setConfirmedRequests(confirmedRequests);
+        results.setRejectedRequests(rejectedRequests);
+        return results;
     }
 
     private BooleanExpression byStates(Set<EventState> states){

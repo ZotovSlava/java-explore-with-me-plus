@@ -12,6 +12,6 @@ public class CompilationUpdateDto {
 
     private Boolean pinned;
 
-    private List<Integer> events;
+    private List<Long> events;
 
 }
