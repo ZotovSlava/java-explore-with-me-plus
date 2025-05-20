@@ -37,11 +37,11 @@ import java.util.*;
 @AllArgsConstructor
 @ComponentScan(value = {"ru.yandex.practicum.ewm","ru.practicum.client"})
 public class EventServiceImpl implements EventService {
-    EventRepository eventRepository;
-    CategoryRepository categoryRepository;
-    UserRepository userRepository;
-    RequestRepository requestRepository;
-    EventMapper mapper;
+    private final EventRepository eventRepository;
+    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
+    private final EventMapper mapper;
 
     StatRestClient statClient;
 
