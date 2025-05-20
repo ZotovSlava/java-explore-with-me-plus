@@ -56,6 +56,28 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(CompilationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleCompilationNotFound(CompilationNotFoundException ex) {
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.name(),
+                "The required object was not found.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
+    @ExceptionHandler(RequestNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleCompilationNotFound(RequestNotFoundException ex) {
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.name(),
+                "The required object was not found.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerValidationException(MethodArgumentNotValidException ex) {
