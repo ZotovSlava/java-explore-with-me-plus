@@ -2,6 +2,8 @@ package ru.yandex.practicum.ewm.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,10 +17,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventCreateDto {
+    @NotBlank(message = "Annotation cannot be blank.")
     private String annotation;
 
     private Long category;
 
+    @NotBlank(message = "Description cannot be blank.")
     private String description;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -32,10 +36,12 @@ public class EventCreateDto {
 
     private Boolean paid;
 
+    @PositiveOrZero(message = "Number must be zero or positive")
     private Integer participantLimit;
 
     private Boolean requestModeration;
 
+    @NotBlank(message = "Title cannot be blank.")
     private String title;
 
     private Integer views = 0;

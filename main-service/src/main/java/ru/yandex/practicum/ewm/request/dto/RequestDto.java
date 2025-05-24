@@ -1,5 +1,6 @@
 package ru.yandex.practicum.ewm.request.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.yandex.practicum.ewm.event.model.Event;
@@ -13,11 +14,12 @@ import java.time.LocalDateTime;
 public class RequestDto {
     private Long id;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created;
 
-    private User requester;
+    private Long requester;
 
-    private Event event;
+    private Long event;
 
     private RequestStatus status;
 }

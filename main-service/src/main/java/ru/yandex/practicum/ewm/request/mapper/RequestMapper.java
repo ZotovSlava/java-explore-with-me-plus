@@ -24,8 +24,8 @@ public class RequestMapper {
         return new RequestDto(
                 request.getId(),
                 request.getCreated(),
-                request.getRequester(),
-                request.getEvent(),
+                request.getRequester().getId(),
+                request.getEvent().getId(),
                 request.getStatus()
         );
     }

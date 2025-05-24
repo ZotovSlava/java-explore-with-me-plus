@@ -3,6 +3,7 @@ package ru.yandex.practicum.ewm.event;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,13 +40,13 @@ public class EventPrivateController {
     }
 
     @PostMapping("/{userId}/events")
-    public ResponseEntity<EventFullDto> get(@PathVariable("userId") Long userId,
+    public ResponseEntity<EventFullDto> create(@PathVariable("userId") Long userId,
                                             @RequestBody @Valid EventCreateDto eventDto) {
         log.info("--> POST запрос /users/{}/events с телом {}", userId, eventDto);
         EventFullDto event = eventService.create(userId, eventDto);
         log.info("<-- POST запрос /users/{}/events вернул ответ: {}", userId, event);
         return ResponseEntity
-                .ok()
+                .status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(event);
     }

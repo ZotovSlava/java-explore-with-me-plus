@@ -10,7 +10,9 @@ import ru.yandex.practicum.ewm.category.dto.CategoryRequestDto;
 import ru.yandex.practicum.ewm.category.mapper.CategoryMapper;
 import ru.yandex.practicum.ewm.category.model.Category;
 import ru.yandex.practicum.ewm.category.storage.CategoryRepository;
+import ru.yandex.practicum.ewm.event.storage.EventRepository;
 import ru.yandex.practicum.ewm.exception.CategoryNotFoundException;
+import ru.yandex.practicum.ewm.exception.ConflictException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public CategoryRequestDto create(CategoryCreateDto categoryCreateDto) {
@@ -47,13 +50,9 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.findById(catId)
                 .orElseThrow(() -> new CategoryNotFoundException(catId));
 
-        // Проверка, что с категорией не связаны события
-        // {
-        //  "status": "CONFLICT",
-        //  "reason": "For the requested operation the conditions are not met.",
-        //  "message": "The category is not empty",
-        //  "timestamp": "2023-01-21 16:56:19"
-        //}
+        if(eventRepository.findFirstByCategoryId(catId).isPresent()) {
+                throw  new ConflictException("The category is not empty");
+        }
 
         categoryRepository.deleteById(catId);
     }

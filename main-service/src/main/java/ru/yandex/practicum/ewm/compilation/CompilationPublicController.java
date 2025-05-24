@@ -17,7 +17,7 @@ public class CompilationPublicController {
 
     @GetMapping
     public  ResponseEntity<List<CompilationRequestDto>> get(
-            @RequestParam Boolean pinned,
+            @RequestParam(defaultValue = "false") Boolean pinned,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size
     ){
