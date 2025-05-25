@@ -35,8 +35,7 @@ public class EventPublicController {
             @RequestParam(required = false) EventPublicSort sort,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         PublicEventParams publicEventParams = new PublicEventParams();
         publicEventParams.setText(text);
         publicEventParams.setCategories(categories);
