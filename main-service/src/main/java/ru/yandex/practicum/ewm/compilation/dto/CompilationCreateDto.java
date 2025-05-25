@@ -14,7 +14,7 @@ public class CompilationCreateDto {
     @Size(min = 3, max = 50, message = "Name length must be between 3 and 50 characters")
     private String title;
 
-    private Boolean pinned = false;
+    private Boolean pinned;
 
     private List<Long> events;
 }

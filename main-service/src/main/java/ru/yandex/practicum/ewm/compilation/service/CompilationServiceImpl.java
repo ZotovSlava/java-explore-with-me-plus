@@ -15,7 +15,9 @@ import ru.yandex.practicum.ewm.event.model.Event;
 import ru.yandex.practicum.ewm.event.storage.EventRepository;
 import ru.yandex.practicum.ewm.exception.CompilationNotFoundException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +29,20 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationRequestDto create(CompilationCreateDto compilationCreateDto) {
-        List<Event> events = eventRepository.findAllById(compilationCreateDto.getEvents());
+        if(compilationCreateDto.getPinned() == null){
+            compilationCreateDto.setPinned(false);
+        }
+
+        List<Long> eventIds = compilationCreateDto.getEvents();
+        if (eventIds == null) {
+            eventIds = Collections.emptyList();
+        } else {
+            eventIds = eventIds.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+
+        List<Event> events = eventRepository.findAllById(eventIds);
 
         return CompilationMapper.toRequestDto(
                 compilationRepository.save(
