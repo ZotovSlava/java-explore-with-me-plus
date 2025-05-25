@@ -1,6 +1,8 @@
 package ru.yandex.practicum.ewm.request.mapper;
 
+import ru.yandex.practicum.ewm.event.model.Event;
 import ru.yandex.practicum.ewm.request.dto.RequestDto;
+import ru.yandex.practicum.ewm.request.dto.RequestEventDto;
 import ru.yandex.practicum.ewm.request.model.Request;
 import ru.yandex.practicum.ewm.request.model.RequestStatus;
 import ru.yandex.practicum.ewm.user.model.User;
@@ -27,4 +29,15 @@ public class RequestMapper {
                 request.getStatus()
         );
     }
+
+    public static RequestEventDto toEventRequestDto(Request request) {
+        return new RequestEventDto(
+                request.getId(),
+                request.getCreated(),
+                request.getRequester().getId(),
+                request.getEvent().getId(),
+                request.getStatus()
+        );
+    }
+
 }

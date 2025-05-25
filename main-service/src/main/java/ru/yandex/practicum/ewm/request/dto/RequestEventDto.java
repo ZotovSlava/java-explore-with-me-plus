@@ -2,22 +2,21 @@ package ru.yandex.practicum.ewm.request.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.yandex.practicum.ewm.event.model.Event;
 import ru.yandex.practicum.ewm.request.model.RequestStatus;
-import ru.yandex.practicum.ewm.user.model.User;
 
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class RequestDto {
+public class RequestEventDto {
     private Long id;
 
     private LocalDateTime created;
 
-    private User requester;
+    private Long requester;
 
-    private Event event;
+    private Long event;
 
     private RequestStatus status;
+
 }

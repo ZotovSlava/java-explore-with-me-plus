@@ -4,6 +4,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.ewm.compilation.dto.CompilationCreateDto;
 import ru.yandex.practicum.ewm.compilation.dto.CompilationRequestDto;
 import ru.yandex.practicum.ewm.compilation.model.Compilation;
+import ru.yandex.practicum.ewm.event.model.Event;
+
+import java.util.List;
 
 @Component
 public class CompilationMapper {

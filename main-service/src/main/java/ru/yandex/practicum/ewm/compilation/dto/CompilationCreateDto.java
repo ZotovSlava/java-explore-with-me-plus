@@ -14,5 +14,5 @@ public class CompilationCreateDto {
 
     private Boolean pinned = false;
 
-    private List<Integer> events;
+    private List<Long> events;
 }
