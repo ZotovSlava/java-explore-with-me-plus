@@ -2,14 +2,21 @@ package ru.yandex.practicum.ewm.request.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.ewm.event.model.Event;
+import ru.yandex.practicum.ewm.event.model.EventState;
+import ru.yandex.practicum.ewm.event.storage.EventRepository;
 import ru.yandex.practicum.ewm.exception.CompilationNotFoundException;
+import ru.yandex.practicum.ewm.exception.ConflictException;
+import ru.yandex.practicum.ewm.exception.EventNotFoundException;
 import ru.yandex.practicum.ewm.request.dto.RequestDto;
 import ru.yandex.practicum.ewm.request.mapper.RequestMapper;
 import ru.yandex.practicum.ewm.request.model.Request;
 import ru.yandex.practicum.ewm.request.model.RequestStatus;
 import ru.yandex.practicum.ewm.request.storage.RequestRepository;
+import ru.yandex.practicum.ewm.user.model.User;
 import ru.yandex.practicum.ewm.user.storage.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,10 +26,41 @@ public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public RequestDto create(Long userId, Long eventId) {
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CompilationNotFoundException(userId));
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if(user.getId().equals(event.getInitiator().getId())){
+            throw new ConflictException("You cannot register for your own event.");
+        }
+
+        if(!event.getState().equals(EventState.PUBLISHED)){
+            throw new ConflictException("You cannot register in an unpublished event.");
+        }
+
+        if(event.getConfirmedRequests().equals(event.getParticipantLimit())){
+            throw new ConflictException("All spots are taken, registration is not possible.");
+        }
+
+        Request request = new Request();
+        request.setRequester(user);
+        request.setEvent(event);
+        request.setCreated(LocalDateTime.now());
+
+        if(!event.getRequestModeration()){
+            request.setStatus(RequestStatus.CONFIRMED);
+        } else{
+            request.setStatus(RequestStatus.PENDING);
+        }
+
+
+        return RequestMapper.toDto(requestRepository.save(request));
     }
 
     @Override

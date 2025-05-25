@@ -11,7 +11,7 @@ import java.util.Set;
 public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByRequesterId(Long userId);
 
-    List<Request> findAllByRequesterIdAndEventId(Long userId, Long eventId);
+    List<Request> findAllByEventId(Long eventId);
 
     List<Request> findAllByEventIdAndIdIn(Long eventId, Set<Long> requestIds);
 }

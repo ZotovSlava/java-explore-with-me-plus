@@ -25,14 +25,14 @@ public class EventPublicController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> get(
-            @RequestParam String text,
-            @RequestParam Set<Long> categories,
-            @RequestParam Boolean paid,
-            @RequestParam  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-            @RequestParam Boolean onlyAvailable,
-            @RequestParam EventPublicSort sort,
+    public ResponseEntity<List<EventShortDto>> get(                                                                       // надо изменить всю логику чтобы все работало с любым набором параметров
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) Set<Long> categories,
+            @RequestParam(required = false) Boolean paid,
+            @RequestParam(required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+            @RequestParam(required = false) EventPublicSort sort,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request

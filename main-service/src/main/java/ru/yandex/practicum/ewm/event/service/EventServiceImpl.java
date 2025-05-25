@@ -16,11 +16,8 @@ import ru.yandex.practicum.ewm.event.dto.*;
 import ru.yandex.practicum.ewm.event.mapper.EventMapper;
 import ru.yandex.practicum.ewm.event.model.*;
 import ru.yandex.practicum.ewm.event.storage.EventRepository;
-import ru.yandex.practicum.ewm.exception.CategoryNotFoundException;
-import ru.yandex.practicum.ewm.exception.EventGetBadRequestException;
-import ru.yandex.practicum.ewm.exception.EventNotFoundException;
+import ru.yandex.practicum.ewm.exception.*;
 import ru.practicum.client.StatRestClient;
-import ru.yandex.practicum.ewm.exception.UserNotFoundException;
 import ru.yandex.practicum.ewm.request.dto.RequestEventDto;
 import ru.yandex.practicum.ewm.request.mapper.RequestMapper;
 import ru.yandex.practicum.ewm.request.model.Request;
@@ -225,7 +222,11 @@ public class EventServiceImpl implements EventService {
         if (event.isEmpty()) {
             throw new EventNotFoundException(eventId);
         }
-        List<Request> requests = requestRepository.findAllByRequesterIdAndEventId(userId, eventId);
+
+        if (!event.get().getInitiator().getId().equals(userId)){
+            throw new ConflictException("Вы не являетесь владельцем данного события");
+        }
+        List<Request> requests = requestRepository.findAllByEventId(eventId);
         return requests.stream()
                 .map(RequestMapper::toEventRequestDto)
                 .toList();
