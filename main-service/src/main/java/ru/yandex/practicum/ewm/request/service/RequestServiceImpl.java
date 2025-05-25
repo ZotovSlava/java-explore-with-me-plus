@@ -55,6 +55,9 @@ public class RequestServiceImpl implements RequestService {
 
         if(!event.getRequestModeration()){
             request.setStatus(RequestStatus.CONFIRMED);
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+
         } else{
             request.setStatus(RequestStatus.PENDING);
         }
