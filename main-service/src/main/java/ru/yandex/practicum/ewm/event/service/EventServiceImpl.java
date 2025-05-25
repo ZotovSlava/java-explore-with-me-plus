@@ -86,7 +86,7 @@ public class EventServiceImpl implements EventService {
 
         Page<Event> pageEvents = eventRepository.findAll(filter, pageRequest);
         List<Event> foundEvents = pageEvents.getContent();
-        if (foundEvents.size() == 0) {
+        if (foundEvents.isEmpty()) {
             throw new EventsGetPublicBadRequestException();
         }
         statClient.saveHit(new HitDto("ewm-main-service", "/events", params.getIpAdr(), LocalDateTime.now()));
@@ -121,7 +121,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
         List<StatsDto> stats = statClient.getStats("1900-01-01 00:00:00", "2100-01-01 00:00:00", List.of("/events/" + eventId), true);
-        if (stats.size() == 0) {
+        if (stats.isEmpty()) {
             event.get().setViews(event.get().getViews() + 1);
             eventRepository.save(event.get());
         }
@@ -188,7 +188,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
         Optional<Category> category;
-        if (eventDto.getCategory() != null && eventDto.getCategory() != event.get().getCategory().getId()) {
+        if (eventDto.getCategory() != null && !eventDto.getCategory().equals(event.get().getCategory().getId())) {
             category = categoryRepository.findById(eventDto.getCategory());
             if (category.isEmpty()) {
                 throw new CategoryNotFoundException(eventDto.getCategory());
@@ -199,7 +199,7 @@ public class EventServiceImpl implements EventService {
         if (event.get().getInitiator().getId() != userId) {
             throw new EventGetBadRequestException(eventId, userId);
         }
-        if (eventDto.getEventDate() != null && eventDto.getEventDate().minus(2, ChronoUnit.HOURS).isBefore(LocalDateTime.now())) {
+        if (eventDto.getEventDate() != null && eventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new EventDateException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента.");
         }
         if (event.get().getState().equals(EventState.PUBLISHED)) {
@@ -274,16 +274,14 @@ public class EventServiceImpl implements EventService {
             }
             if (updateDto.getStatus().equals(RequestStatus.CONFIRMED) && counter < count) {
                 counter++;
-                Request updRequest = request;
-                updRequest.setStatus(RequestStatus.CONFIRMED);
-                requestRepository.save(updRequest);
+                request.setStatus(RequestStatus.CONFIRMED);
+                requestRepository.save(request);
                 RequestEventDto requestDto = RequestMapper.toEventRequestDto(request);
                 confirmedRequests.add(requestDto);
             } else {
                 counter++;
-                Request updRequest = request;
-                updRequest.setStatus(RequestStatus.REJECTED);
-                requestRepository.save(updRequest);
+                request.setStatus(RequestStatus.REJECTED);
+                requestRepository.save(request);
                 RequestEventDto requestDto = RequestMapper.toEventRequestDto(request);
                 rejectedRequests.add(requestDto);
             }
@@ -292,12 +290,8 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event.get());
 
         EventResultRequestStatusDto results = new EventResultRequestStatusDto();
-        if (confirmedRequests != null) {
-            results.setConfirmedRequests(confirmedRequests);
-        }
-        if (rejectedRequests != null) {
-            results.setRejectedRequests(rejectedRequests);
-        }
+        results.setConfirmedRequests(confirmedRequests);
+        results.setRejectedRequests(rejectedRequests);
         return results;
     }
 
@@ -335,7 +329,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private BooleanExpression byOnlyAvailable(Boolean onlyAvailable) {
-        return onlyAvailable != null && onlyAvailable == true ? QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit) : null;
+        return onlyAvailable != null && onlyAvailable ? QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit) : null;
     }
 
 }
