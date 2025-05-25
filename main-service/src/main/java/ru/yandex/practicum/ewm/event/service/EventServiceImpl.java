@@ -260,7 +260,7 @@ public class EventServiceImpl implements EventService {
         if (limit == 0 || !event.get().getRequestModeration()) {
             return null;
         }
-        if (confReqs == limit && updateDto.getStatus().equals(RequestStatus.CONFIRMED)) {
+        if (Objects.equals(confReqs, limit) && updateDto.getStatus().equals(RequestStatus.CONFIRMED)) {
             throw new DataIntegrityViolationException("The participant limit has been reached");
         }
         int count = limit - confReqs;
