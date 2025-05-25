@@ -139,7 +139,7 @@ public class EventServiceImpl implements EventService {
         if (event.isEmpty()) {
             throw new EventNotFoundException(eventId);
         }
-        if (event.get().getInitiator().getId() != userId) {
+        if (!Objects.equals(event.get().getInitiator().getId(), userId)) {
             throw new EventGetBadRequestException(eventId, userId);
         }
         return mapper.toEventFullDto(event.get());
@@ -152,7 +152,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
         Optional<Category> category;
-        if (eventDto.getCategory() != null && eventDto.getCategory() != event.get().getCategory().getId()) {
+        if (eventDto.getCategory() != null && !eventDto.getCategory().equals(event.get().getCategory().getId())) {
             category = categoryRepository.findById(eventDto.getCategory());
             if (category.isEmpty()) {
                 throw new CategoryNotFoundException(eventDto.getCategory());
@@ -196,7 +196,7 @@ public class EventServiceImpl implements EventService {
         } else {
             category = Optional.of(event.get().getCategory());
         }
-        if (event.get().getInitiator().getId() != userId) {
+        if (!Objects.equals(event.get().getInitiator().getId(), userId)) {
             throw new EventGetBadRequestException(eventId, userId);
         }
         if (eventDto.getEventDate() != null && eventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
