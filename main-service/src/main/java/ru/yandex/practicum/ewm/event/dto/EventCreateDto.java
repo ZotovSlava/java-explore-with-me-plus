@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,11 +19,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EventCreateDto {
     @NotBlank(message = "Annotation cannot be blank.")
+    @Size(max = 2000, min = 20, message = "Annotation length must be between 20 and 2000 characters")
     private String annotation;
 
     private Long category;
 
     @NotBlank(message = "Description cannot be blank.")
+    @Size(max = 7000, min = 20, message = "Description length must be between 20 and 7000 characters")
     private String description;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -42,6 +45,7 @@ public class EventCreateDto {
     private Boolean requestModeration;
 
     @NotBlank(message = "Title cannot be blank.")
+    @Size(max = 120, min = 3, message = "Title length must be between 3 and 120 characters")
     private String title;
 
     private Integer views = 0;

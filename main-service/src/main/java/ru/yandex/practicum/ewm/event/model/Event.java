@@ -20,7 +20,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "annotation", nullable = false, length = 1000)
+    @Column(name = "annotation", nullable = false, length = 2000)
     private String annotation;
 
     @ManyToOne
@@ -33,7 +33,7 @@ public class Event {
     @Column(name = "created")
     private LocalDateTime createdOn;
 
-    @Column(name = "description", length = 1000)
+    @Column(name = "description", length = 7000)
     private String description;
 
     @Column(name = "event_date", nullable = false)
@@ -65,7 +65,7 @@ public class Event {
     @Column(name = "state")
     private EventState state;
 
-    @Column(name = "title", nullable = false, length = 1000)
+    @Column(name = "title", nullable = false, length = 120)
     private String title;
 
     @Column(name = "views")

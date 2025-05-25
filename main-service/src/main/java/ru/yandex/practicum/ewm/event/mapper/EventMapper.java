@@ -61,8 +61,11 @@ public class EventMapper {
         }
         if (eventDto.getPaid() != null) { curEvent.setPaid(eventDto.getPaid()); }
         if (eventDto.getParticipantLimit() != null) { curEvent.setParticipantLimit(eventDto.getParticipantLimit()); }
-        if (eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT)) { curEvent.setState(EventState.PUBLISHED); }
-        if (eventDto.getStateAction().equals(EventStateAction.REJECT_EVENT)) { curEvent.setState(EventState.CANCELED); }
+        if (EventStateAction.PUBLISH_EVENT.equals(eventDto.getStateAction())) {
+            curEvent.setState(EventState.PUBLISHED);
+        } else if (EventStateAction.REJECT_EVENT.equals(eventDto.getStateAction())) {
+            curEvent.setState(EventState.CANCELED);
+        }
         if (eventDto.getTitle() != null) { curEvent.setTitle(eventDto.getTitle()); }
 
         return curEvent;
@@ -79,8 +82,13 @@ public class EventMapper {
             curEvent.setLon(eventDto.getLocation().lon);
         }
         if (eventDto.getParticipantLimit() != null) { curEvent.setParticipantLimit(eventDto.getParticipantLimit()); }
-        if (eventDto.getStateAction().equals(EventUserStateAction.SEND_TO_REVIEW)) { curEvent.setState(EventState.PENDING); }
-        if (eventDto.getStateAction().equals(EventUserStateAction.CANCEL_REVIEW)) { curEvent.setState(EventState.PUBLISHED); }
+        if (eventDto.getStateAction() != null) {
+            if (eventDto.getStateAction().equals(EventUserStateAction.SEND_TO_REVIEW)) {
+                curEvent.setState(EventState.PENDING);
+            } else if (eventDto.getStateAction().equals(EventUserStateAction.CANCEL_REVIEW)) {
+                curEvent.setState(EventState.PUBLISHED);
+            }
+        }
         if (eventDto.getTitle() != null) { curEvent.setTitle(eventDto.getTitle()); }
 
         return curEvent;

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.client.StatRestClient;
 import ru.practicum.dto.HitDto;
 import ru.yandex.practicum.ewm.category.model.Category;
 import ru.yandex.practicum.ewm.category.model.QCategory;
@@ -17,7 +18,6 @@ import ru.yandex.practicum.ewm.event.mapper.EventMapper;
 import ru.yandex.practicum.ewm.event.model.*;
 import ru.yandex.practicum.ewm.event.storage.EventRepository;
 import ru.yandex.practicum.ewm.exception.*;
-import ru.practicum.client.StatRestClient;
 import ru.yandex.practicum.ewm.request.dto.RequestEventDto;
 import ru.yandex.practicum.ewm.request.mapper.RequestMapper;
 import ru.yandex.practicum.ewm.request.model.Request;
@@ -28,11 +28,14 @@ import ru.yandex.practicum.ewm.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
-@ComponentScan(value = {"ru.yandex.practicum.ewm","ru.practicum.client"})
+@ComponentScan(value = {"ru.yandex.practicum.ewm", "ru.practicum.client"})
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
@@ -82,7 +85,7 @@ public class EventServiceImpl implements EventService {
         Page<Event> pageEvents = eventRepository.findAll(filter, pageRequest);
         List<Event> foundEvents = pageEvents.getContent();
 
-        statClient.saveHit(new HitDto("ewm-main-service","/events", params.getIpAdr(), LocalDateTime.now()));
+        statClient.saveHit(new HitDto("ewm-main-service", "/events", params.getIpAdr(), LocalDateTime.now()));
 
 
         return foundEvents.stream()
@@ -114,7 +117,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
 
-        statClient.saveHit(new HitDto("ewm-main-service","/events" + eventId, params.getIpAdr(), LocalDateTime.now()));
+        statClient.saveHit(new HitDto("ewm-main-service", "/events" + eventId, params.getIpAdr(), LocalDateTime.now()));
 
         return mapper.toEventFullDto(event.get());
     }
@@ -150,8 +153,10 @@ public class EventServiceImpl implements EventService {
         } else {
             category = Optional.of(event.get().getCategory());
         }
-        if (eventDto.getEventDate() != null && eventDto.getEventDate().isBefore(event.get().getPublishedOn().minus(1, ChronoUnit.HOURS))) {
-            throw new DataIntegrityViolationException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
+        if (event.get().getPublishedOn() != null) {
+            if (eventDto.getEventDate() != null && eventDto.getEventDate().isBefore(event.get().getPublishedOn().minus(1, ChronoUnit.HOURS))) {
+                throw new DataIntegrityViolationException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
+            }
         }
         if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT) && !event.get().getState().equals(EventState.PENDING)) {
             throw new DataIntegrityViolationException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
@@ -186,8 +191,10 @@ public class EventServiceImpl implements EventService {
         if (event.get().getInitiator().getId() != userId) {
             throw new EventGetBadRequestException(eventId, userId);
         }
-        if (eventDto.getEventDate().minus(1, ChronoUnit.HOURS).isBefore(LocalDateTime.now())) {
-            throw new DataIntegrityViolationException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента.");
+        if(eventDto.getEventDate() != null) {
+            if (eventDto.getEventDate().minus(1, ChronoUnit.HOURS).isBefore(LocalDateTime.now())) {
+                throw new DataIntegrityViolationException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента.");
+            }
         }
         if (event.get().getState().equals(EventState.PUBLISHED)) {
             throw new DataIntegrityViolationException("Изменить можно только отмененные события или события в состоянии ожидания модерации.");
@@ -223,7 +230,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
 
-        if (!event.get().getInitiator().getId().equals(userId)){
+        if (!event.get().getInitiator().getId().equals(userId)) {
             throw new ConflictException("Вы не являетесь владельцем данного события");
         }
         List<Request> requests = requestRepository.findAllByEventId(eventId);
@@ -283,40 +290,40 @@ public class EventServiceImpl implements EventService {
         return results;
     }
 
-    private BooleanExpression byStates(Set<EventState> states){
+    private BooleanExpression byStates(Set<EventState> states) {
         return states != null ? QEvent.event.state.in(states) : null;
     }
 
-    private BooleanExpression byCategoryIds(Set<Long> categories){
+    private BooleanExpression byCategoryIds(Set<Long> categories) {
         return categories != null && !categories.isEmpty() && categories.iterator().next() != 0 ? QCategory.category.id.in(categories) : null;
     }
 
-    private BooleanExpression byUserIds(Set<Long> users){
+    private BooleanExpression byUserIds(Set<Long> users) {
         return users != null && !users.isEmpty() && users.iterator().next() != 0 ? QEvent.event.initiator.id.in(users) : null;
     }
 
-    private BooleanExpression byDates(LocalDateTime start, LocalDateTime end){
+    private BooleanExpression byDates(LocalDateTime start, LocalDateTime end) {
         return start != null && end != null ? QEvent.event.eventDate.after(start).and(QEvent.event.eventDate.before(end)) : null;
     }
 
-    private BooleanExpression byDatesWithDefaults(LocalDateTime start, LocalDateTime end){
+    private BooleanExpression byDatesWithDefaults(LocalDateTime start, LocalDateTime end) {
         return start != null && end != null ? QEvent.event.eventDate.after(start).and(QEvent.event.eventDate.before(end)) : QEvent.event.eventDate.after(LocalDateTime.now());
     }
 
-    private BooleanExpression byText(String text){
+    private BooleanExpression byText(String text) {
         return text != null && !text.equals("0") ? QEvent.event.annotation.containsIgnoreCase(text) : null;
     }
 
-    private BooleanExpression byPaid(Boolean paid){
+    private BooleanExpression byPaid(Boolean paid) {
         return paid != null ? QEvent.event.paid.eq(paid) : null;
     }
 
-    private BooleanExpression byPublishedEvents(){
+    private BooleanExpression byPublishedEvents() {
         return QEvent.event.state.eq(EventState.PUBLISHED);
     }
 
-    private BooleanExpression byOnlyAvailable(Boolean onlyAvailable){
-            return onlyAvailable != null &&  onlyAvailable == true ? QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit) : null;
+    private BooleanExpression byOnlyAvailable(Boolean onlyAvailable) {
+        return onlyAvailable != null && onlyAvailable == true ? QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit) : null;
     }
 
 }

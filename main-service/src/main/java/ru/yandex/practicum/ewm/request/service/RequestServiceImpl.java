@@ -44,7 +44,8 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("You cannot register in an unpublished event.");
         }
 
-        if(event.getConfirmedRequests().equals(event.getParticipantLimit())){
+        int confirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        if (event.getParticipantLimit() != 0 && confirmed >= event.getParticipantLimit()) {
             throw new ConflictException("All spots are taken, registration is not possible.");
         }
 
@@ -53,7 +54,7 @@ public class RequestServiceImpl implements RequestService {
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
 
-        if(!event.getRequestModeration()){
+        if(!event.getRequestModeration() || event.getParticipantLimit() == 0){
             request.setStatus(RequestStatus.CONFIRMED);
         } else{
             request.setStatus(RequestStatus.PENDING);
