@@ -1,10 +1,10 @@
 package ru.yandex.practicum.ewm.event.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import ru.yandex.practicum.ewm.category.model.Category;
 import ru.yandex.practicum.ewm.user.model.User;
 
@@ -20,7 +20,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "annotation", nullable = false, length = 1000)
+    @Column(name = "annotation", nullable = false, length = 2000)
     private String annotation;
 
     @ManyToOne
@@ -33,7 +33,7 @@ public class Event {
     @Column(name = "created")
     private LocalDateTime createdOn;
 
-    @Column(name = "description", length = 1000)
+    @Column(name = "description", length = 7000)
     private String description;
 
     @Column(name = "event_date", nullable = false)
@@ -50,16 +50,19 @@ public class Event {
     public Float lon;
 
     @Column(name = "paid", nullable = false)
+    @ColumnDefault("false")
     private Boolean paid;
 
     @Column(name = "participant_limit")
+    @ColumnDefault("0")
     private Integer participantLimit;
 
     @Column(name = "published")
     private LocalDateTime publishedOn;
 
     @Column(name = "request_moderation")
-    private Boolean requestModeration;
+    @ColumnDefault("true")
+    private Boolean requestModeration = true;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
@@ -70,5 +73,19 @@ public class Event {
 
     @Column(name = "views")
     private Integer views;
+
+    @PrePersist
+    public void prePersist() {
+        if (paid == null) {
+            paid = false;
+        }
+        if (requestModeration == null) {
+            requestModeration = true;
+        }
+        if (participantLimit == null) {
+            participantLimit = 0;
+        }
+    }
+
 
 }

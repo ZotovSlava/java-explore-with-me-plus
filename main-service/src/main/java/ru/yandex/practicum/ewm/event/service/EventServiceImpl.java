@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.HitDto;
+import ru.practicum.dto.StatsDto;
 import ru.yandex.practicum.ewm.category.model.Category;
 import ru.yandex.practicum.ewm.category.model.QCategory;
 import ru.yandex.practicum.ewm.category.storage.CategoryRepository;
@@ -64,10 +65,14 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getPublic(PublicEventParams params) {
 
         PageRequest pageRequest;
-        if (params.getSort().equals(EventPublicSort.EVENT_DATE)) {
-            pageRequest = PageRequest.of(params.getFrom() > 0 ? params.getFrom() / params.getSize() : 0, params.getSize(), Sort.by("eventDate"));
-        } else if (params.getSort().equals(EventPublicSort.VIEWS)) {
-            pageRequest = PageRequest.of(params.getFrom() > 0 ? params.getFrom() / params.getSize() : 0, params.getSize(), Sort.by("views"));
+        if (params.getSort() != null) {
+            if (params.getSort().equals(EventPublicSort.EVENT_DATE)) {
+                pageRequest = PageRequest.of(params.getFrom() > 0 ? params.getFrom() / params.getSize() : 0, params.getSize(), Sort.by("eventDate"));
+            } else if (params.getSort().equals(EventPublicSort.VIEWS)) {
+                pageRequest = PageRequest.of(params.getFrom() > 0 ? params.getFrom() / params.getSize() : 0, params.getSize(), Sort.by("views"));
+            } else {
+                pageRequest = PageRequest.of(params.getFrom() > 0 ? params.getFrom() / params.getSize() : 0, params.getSize());
+            }
         } else {
             pageRequest = PageRequest.of(params.getFrom() > 0 ? params.getFrom() / params.getSize() : 0, params.getSize());
         }
@@ -81,7 +86,9 @@ public class EventServiceImpl implements EventService {
 
         Page<Event> pageEvents = eventRepository.findAll(filter, pageRequest);
         List<Event> foundEvents = pageEvents.getContent();
-
+        if (foundEvents.size() == 0) {
+            throw new EventsGetPublicBadRequestException();
+        }
         statClient.saveHit(new HitDto("ewm-main-service","/events", params.getIpAdr(), LocalDateTime.now()));
 
 
@@ -113,9 +120,12 @@ public class EventServiceImpl implements EventService {
         if (event.isEmpty() || !event.get().getState().equals(EventState.PUBLISHED)) {
             throw new EventNotFoundException(eventId);
         }
-
-        statClient.saveHit(new HitDto("ewm-main-service","/events" + eventId, params.getIpAdr(), LocalDateTime.now()));
-
+        List<StatsDto> stats =  statClient.getStats("1900-01-01 00:00:00","2100-01-01 00:00:00", List.of("/events/" + eventId), true);
+        if (stats.size() == 0) {
+            event.get().setViews(event.get().getViews() + 1);
+            eventRepository.save(event.get());
+        }
+        statClient.saveHit(new HitDto("ewm-main-service","/events/" + eventId, params.getIpAdr(), LocalDateTime.now()));
         return mapper.toEventFullDto(event.get());
     }
 
@@ -150,7 +160,10 @@ public class EventServiceImpl implements EventService {
         } else {
             category = Optional.of(event.get().getCategory());
         }
-        if (eventDto.getEventDate() != null && eventDto.getEventDate().isBefore(event.get().getPublishedOn().minus(1, ChronoUnit.HOURS))) {
+        if (eventDto.getEventDate() != null && eventDto.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new EventDateException("Изменение даты события не может быть на уже наступившую.");
+        }
+        if (eventDto.getEventDate() != null && event.get().getPublishedOn() != null && eventDto.getEventDate().isBefore(event.get().getPublishedOn().minus(1, ChronoUnit.HOURS))) {
             throw new DataIntegrityViolationException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
         }
         if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT) && !event.get().getState().equals(EventState.PENDING)) {
@@ -186,8 +199,8 @@ public class EventServiceImpl implements EventService {
         if (event.get().getInitiator().getId() != userId) {
             throw new EventGetBadRequestException(eventId, userId);
         }
-        if (eventDto.getEventDate().minus(1, ChronoUnit.HOURS).isBefore(LocalDateTime.now())) {
-            throw new DataIntegrityViolationException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента.");
+        if (eventDto.getEventDate() != null && eventDto.getEventDate().minus(2, ChronoUnit.HOURS).isBefore(LocalDateTime.now())) {
+            throw new EventDateException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента.");
         }
         if (event.get().getState().equals(EventState.PUBLISHED)) {
             throw new DataIntegrityViolationException("Изменить можно только отмененные события или события в состоянии ожидания модерации.");
@@ -259,7 +272,7 @@ public class EventServiceImpl implements EventService {
             if (!request.getStatus().equals(RequestStatus.PENDING)) {
                 throw new DataIntegrityViolationException("Request must have status PENDING");
             }
-            if (updateDto.getStatus().equals(RequestStatus.CONFIRMED) && counter < count) {
+            if (updateDto.getStatus().equals(RequestStatus.CONFIRMED) && counter < count ) {
                 counter++;
                 Request updRequest = request;
                 updRequest.setStatus(RequestStatus.CONFIRMED);
@@ -267,8 +280,9 @@ public class EventServiceImpl implements EventService {
                 RequestEventDto requestDto = RequestMapper.toEventRequestDto(request);
                 confirmedRequests.add(requestDto);
             } else {
+                counter++;
                 Request updRequest = request;
-                updRequest.setStatus(RequestStatus.CANCELED);
+                updRequest.setStatus(RequestStatus.REJECTED);
                 requestRepository.save(updRequest);
                 RequestEventDto requestDto = RequestMapper.toEventRequestDto(request);
                 rejectedRequests.add(requestDto);
@@ -278,13 +292,14 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event.get());
 
         EventResultRequestStatusDto results = new EventResultRequestStatusDto();
-        results.setConfirmedRequests(confirmedRequests);
-        results.setRejectedRequests(rejectedRequests);
+        if (confirmedRequests != null) { results.setConfirmedRequests(confirmedRequests); }
+        if (rejectedRequests != null) { results.setRejectedRequests(rejectedRequests); }
         return results;
     }
 
     private BooleanExpression byStates(Set<EventState> states){
-        return states != null ? QEvent.event.state.in(states) : null;
+
+        return states != null ? QEvent.event.state.in(states) : QEvent.event.state.in(Set.of(EventState.CANCELED,EventState.PENDING,EventState.PUBLISHED));
     }
 
     private BooleanExpression byCategoryIds(Set<Long> categories){

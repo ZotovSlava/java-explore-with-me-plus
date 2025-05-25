@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.ewm.event.model.Location;
 
 import java.time.LocalDateTime;
@@ -18,11 +19,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EventCreateDto {
     @NotBlank(message = "Annotation cannot be blank.")
+    @Length(min = 20, max = 2000)
     private String annotation;
 
     private Long category;
 
     @NotBlank(message = "Description cannot be blank.")
+    @Length(min = 20, max = 7000)
     private String description;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -42,6 +45,7 @@ public class EventCreateDto {
     private Boolean requestModeration;
 
     @NotBlank(message = "Title cannot be blank.")
+    @Length(min = 3, max = 120)
     private String title;
 
     private Integer views = 0;

@@ -39,13 +39,13 @@ public class EventAdminController {
 
     @GetMapping
     public ResponseEntity<List<EventFullDto>> get(
-            @RequestParam Set<Long> users,
-            @RequestParam Set<EventState> states,
-            @RequestParam Set<Long> categories,
-            @RequestParam  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-            @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(required = false) Set<Long> users,
+            @RequestParam(required = false) Set<EventState> states,
+            @RequestParam(required = false) Set<Long> categories,
+            @RequestParam(required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(required = false, defaultValue = "0") int from,
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
         AdminEventParams adminEventParams = new AdminEventParams();
         log.info("- new AdminEventParams -");

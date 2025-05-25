@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.ewm.event.model.EventStateAction;
 import ru.yandex.practicum.ewm.event.model.Location;
 
@@ -17,18 +18,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EventUpdateAdminDto {
 
+    @Length(min = 20, max = 2000)
     private String annotation;
+
     private Long category;
+
+    @Length(min = 20, max = 7000)
     private String description;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
+
     private Location location;
+
     private Boolean paid;
 
     @PositiveOrZero(message = "Number must be zero or positive")
     private Integer participantLimit;
+
     private Boolean requestModeration;
+
     private EventStateAction stateAction;
+
+    @Length(min = 3, max = 120)
     private String title;
 }
