@@ -19,7 +19,7 @@ public class RequestPrivateController {
 
     @PostMapping
     public ResponseEntity<RequestDto> create(@PathVariable Long userId,
-                                             @RequestParam Long eventId){
+                                             @RequestParam Long eventId) {
         RequestDto requestDto = requestService.create(userId, eventId);
 
         return ResponseEntity
@@ -29,7 +29,7 @@ public class RequestPrivateController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RequestDto>> get(@PathVariable Long userId){
+    public ResponseEntity<List<RequestDto>> get(@PathVariable Long userId) {
         List<RequestDto> requests = requestService.get(userId);
 
         return ResponseEntity
@@ -40,7 +40,7 @@ public class RequestPrivateController {
 
     @PatchMapping("{requestId}/cancel")
     public ResponseEntity<RequestDto> update(@PathVariable Long userId,
-                                             @PathVariable Long requestId){
+                                             @PathVariable Long requestId) {
         RequestDto requestDto = requestService.update(userId, requestId);
 
         return ResponseEntity

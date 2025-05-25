@@ -29,7 +29,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationRequestDto create(CompilationCreateDto compilationCreateDto) {
-        if(compilationCreateDto.getPinned() == null){
+        if (compilationCreateDto.getPinned() == null) {
             compilationCreateDto.setPinned(false);
         }
 

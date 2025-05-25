@@ -23,7 +23,7 @@ public class EventUpdateUserDto {
     @Size(max = 7000, min = 20, message = "Description length must be between 20 and 7000 characters")
     private String description;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     private Location location;
 

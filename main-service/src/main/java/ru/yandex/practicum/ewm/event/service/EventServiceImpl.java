@@ -33,7 +33,7 @@ import java.util.*;
 
 @Service
 @AllArgsConstructor
-@ComponentScan(value = {"ru.yandex.practicum.ewm","ru.practicum.client"})
+@ComponentScan(value = {"ru.yandex.practicum.ewm", "ru.practicum.client"})
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
@@ -89,7 +89,7 @@ public class EventServiceImpl implements EventService {
         if (foundEvents.size() == 0) {
             throw new EventsGetPublicBadRequestException();
         }
-        statClient.saveHit(new HitDto("ewm-main-service","/events", params.getIpAdr(), LocalDateTime.now()));
+        statClient.saveHit(new HitDto("ewm-main-service", "/events", params.getIpAdr(), LocalDateTime.now()));
 
 
         return foundEvents.stream()
@@ -120,12 +120,12 @@ public class EventServiceImpl implements EventService {
         if (event.isEmpty() || !event.get().getState().equals(EventState.PUBLISHED)) {
             throw new EventNotFoundException(eventId);
         }
-        List<StatsDto> stats =  statClient.getStats("1900-01-01 00:00:00","2100-01-01 00:00:00", List.of("/events/" + eventId), true);
+        List<StatsDto> stats = statClient.getStats("1900-01-01 00:00:00", "2100-01-01 00:00:00", List.of("/events/" + eventId), true);
         if (stats.size() == 0) {
             event.get().setViews(event.get().getViews() + 1);
             eventRepository.save(event.get());
         }
-        statClient.saveHit(new HitDto("ewm-main-service","/events/" + eventId, params.getIpAdr(), LocalDateTime.now()));
+        statClient.saveHit(new HitDto("ewm-main-service", "/events/" + eventId, params.getIpAdr(), LocalDateTime.now()));
         return mapper.toEventFullDto(event.get());
     }
 
@@ -236,7 +236,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
 
-        if (!event.get().getInitiator().getId().equals(userId)){
+        if (!event.get().getInitiator().getId().equals(userId)) {
             throw new ConflictException("Вы не являетесь владельцем данного события");
         }
         List<Request> requests = requestRepository.findAllByEventId(eventId);
@@ -272,7 +272,7 @@ public class EventServiceImpl implements EventService {
             if (!request.getStatus().equals(RequestStatus.PENDING)) {
                 throw new DataIntegrityViolationException("Request must have status PENDING");
             }
-            if (updateDto.getStatus().equals(RequestStatus.CONFIRMED) && counter < count ) {
+            if (updateDto.getStatus().equals(RequestStatus.CONFIRMED) && counter < count) {
                 counter++;
                 Request updRequest = request;
                 updRequest.setStatus(RequestStatus.CONFIRMED);
@@ -292,46 +292,50 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event.get());
 
         EventResultRequestStatusDto results = new EventResultRequestStatusDto();
-        if (confirmedRequests != null) { results.setConfirmedRequests(confirmedRequests); }
-        if (rejectedRequests != null) { results.setRejectedRequests(rejectedRequests); }
+        if (confirmedRequests != null) {
+            results.setConfirmedRequests(confirmedRequests);
+        }
+        if (rejectedRequests != null) {
+            results.setRejectedRequests(rejectedRequests);
+        }
         return results;
     }
 
-    private BooleanExpression byStates(Set<EventState> states){
+    private BooleanExpression byStates(Set<EventState> states) {
 
-        return states != null ? QEvent.event.state.in(states) : QEvent.event.state.in(Set.of(EventState.CANCELED,EventState.PENDING,EventState.PUBLISHED));
+        return states != null ? QEvent.event.state.in(states) : QEvent.event.state.in(Set.of(EventState.CANCELED, EventState.PENDING, EventState.PUBLISHED));
     }
 
-    private BooleanExpression byCategoryIds(Set<Long> categories){
+    private BooleanExpression byCategoryIds(Set<Long> categories) {
         return categories != null && !categories.isEmpty() && categories.iterator().next() != 0 ? QCategory.category.id.in(categories) : null;
     }
 
-    private BooleanExpression byUserIds(Set<Long> users){
+    private BooleanExpression byUserIds(Set<Long> users) {
         return users != null && !users.isEmpty() && users.iterator().next() != 0 ? QEvent.event.initiator.id.in(users) : null;
     }
 
-    private BooleanExpression byDates(LocalDateTime start, LocalDateTime end){
+    private BooleanExpression byDates(LocalDateTime start, LocalDateTime end) {
         return start != null && end != null ? QEvent.event.eventDate.after(start).and(QEvent.event.eventDate.before(end)) : null;
     }
 
-    private BooleanExpression byDatesWithDefaults(LocalDateTime start, LocalDateTime end){
+    private BooleanExpression byDatesWithDefaults(LocalDateTime start, LocalDateTime end) {
         return start != null && end != null ? QEvent.event.eventDate.after(start).and(QEvent.event.eventDate.before(end)) : QEvent.event.eventDate.after(LocalDateTime.now());
     }
 
-    private BooleanExpression byText(String text){
+    private BooleanExpression byText(String text) {
         return text != null && !text.equals("0") ? QEvent.event.annotation.containsIgnoreCase(text) : null;
     }
 
-    private BooleanExpression byPaid(Boolean paid){
+    private BooleanExpression byPaid(Boolean paid) {
         return paid != null ? QEvent.event.paid.eq(paid) : null;
     }
 
-    private BooleanExpression byPublishedEvents(){
+    private BooleanExpression byPublishedEvents() {
         return QEvent.event.state.eq(EventState.PUBLISHED);
     }
 
-    private BooleanExpression byOnlyAvailable(Boolean onlyAvailable){
-            return onlyAvailable != null &&  onlyAvailable == true ? QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit) : null;
+    private BooleanExpression byOnlyAvailable(Boolean onlyAvailable) {
+        return onlyAvailable != null && onlyAvailable == true ? QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit) : null;
     }
 
 }

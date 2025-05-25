@@ -25,7 +25,7 @@ public class EventPublicController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> get(                                                                       // надо изменить всю логику чтобы все работало с любым набором параметров
+    public ResponseEntity<List<EventShortDto>> get (                                                                       // надо изменить всю логику чтобы все работало с любым набором параметров
             @RequestParam(required = false) String text,
             @RequestParam(required = false) Set<Long> categories,
             @RequestParam(required = false) Boolean paid,
@@ -37,7 +37,6 @@ public class EventPublicController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request
     ) {
-        //log.info("client ip: {}", request.getRemoteAddr());
         PublicEventParams publicEventParams = new PublicEventParams();
         publicEventParams.setText(text);
         publicEventParams.setCategories(categories);
