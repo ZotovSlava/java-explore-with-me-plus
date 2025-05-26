@@ -51,45 +51,67 @@ public class EventMapper {
 
     public Event toEventFromUpdateAdmin(EventUpdateAdminDto eventDto, Category updCategory, Event curEvent) {
 
-        if (eventDto.getAnnotation() != null) { curEvent.setAnnotation(eventDto.getAnnotation()); }
+        if (eventDto.getAnnotation() != null) {
+            curEvent.setAnnotation(eventDto.getAnnotation());
+        }
         curEvent.setCategory(updCategory);
-        if (eventDto.getDescription() != null) { curEvent.setDescription(eventDto.getDescription()); }
-        if (eventDto.getEventDate() != null) { curEvent.setEventDate(eventDto.getEventDate()); }
+        if (eventDto.getDescription() != null) {
+            curEvent.setDescription(eventDto.getDescription());
+        }
+        if (eventDto.getEventDate() != null) {
+            curEvent.setEventDate(eventDto.getEventDate());
+        }
         if (eventDto.getLocation() != null) {
             curEvent.setLat(eventDto.getLocation().lat);
             curEvent.setLon(eventDto.getLocation().lon);
         }
-        if (eventDto.getPaid() != null) { curEvent.setPaid(eventDto.getPaid()); }
-        if (eventDto.getParticipantLimit() != null) { curEvent.setParticipantLimit(eventDto.getParticipantLimit()); }
-        if (EventStateAction.PUBLISH_EVENT.equals(eventDto.getStateAction())) {
+        if (eventDto.getPaid() != null) {
+            curEvent.setPaid(eventDto.getPaid());
+        }
+        if (eventDto.getParticipantLimit() != null) {
+            curEvent.setParticipantLimit(eventDto.getParticipantLimit());
+        }
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventStateAction.PUBLISH_EVENT)) {
             curEvent.setState(EventState.PUBLISHED);
-        } else if (EventStateAction.REJECT_EVENT.equals(eventDto.getStateAction())) {
+        }
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventStateAction.REJECT_EVENT)) {
             curEvent.setState(EventState.CANCELED);
         }
-        if (eventDto.getTitle() != null) { curEvent.setTitle(eventDto.getTitle()); }
+        if (eventDto.getTitle() != null) {
+            curEvent.setTitle(eventDto.getTitle());
+        }
 
         return curEvent;
     }
 
     public Event toEventFromUpdateUser(EventUpdateUserDto eventDto, Category updCategory, Event curEvent) {
 
-        if (eventDto.getAnnotation() != null) { curEvent.setAnnotation(eventDto.getAnnotation()); }
+        if (eventDto.getAnnotation() != null) {
+            curEvent.setAnnotation(eventDto.getAnnotation());
+        }
         curEvent.setCategory(updCategory);
-        if (eventDto.getDescription() != null) { curEvent.setDescription(eventDto.getDescription()); }
-        if (eventDto.getEventDate() != null) { curEvent.setEventDate(eventDto.getEventDate()); }
+        if (eventDto.getDescription() != null) {
+            curEvent.setDescription(eventDto.getDescription());
+        }
+        if (eventDto.getEventDate() != null) {
+            curEvent.setEventDate(eventDto.getEventDate());
+        }
         if (eventDto.getLocation() != null) {
             curEvent.setLat(eventDto.getLocation().lat);
             curEvent.setLon(eventDto.getLocation().lon);
         }
-        if (eventDto.getParticipantLimit() != null) { curEvent.setParticipantLimit(eventDto.getParticipantLimit()); }
-        if (eventDto.getStateAction() != null) {
-            if (eventDto.getStateAction().equals(EventUserStateAction.SEND_TO_REVIEW)) {
-                curEvent.setState(EventState.PENDING);
-            } else if (eventDto.getStateAction().equals(EventUserStateAction.CANCEL_REVIEW)) {
-                curEvent.setState(EventState.PUBLISHED);
-            }
+        if (eventDto.getParticipantLimit() != null) {
+            curEvent.setParticipantLimit(eventDto.getParticipantLimit());
         }
-        if (eventDto.getTitle() != null) { curEvent.setTitle(eventDto.getTitle()); }
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventUserStateAction.SEND_TO_REVIEW)) {
+            curEvent.setState(EventState.PENDING);
+        }
+        if (eventDto.getStateAction() != null && eventDto.getStateAction().equals(EventUserStateAction.CANCEL_REVIEW)) {
+            curEvent.setState(EventState.CANCELED);
+        }
+        if (eventDto.getTitle() != null) {
+            curEvent.setTitle(eventDto.getTitle());
+        }
 
         return curEvent;
     }

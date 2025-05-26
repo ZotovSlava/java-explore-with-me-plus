@@ -36,16 +36,15 @@ public class RequestServiceImpl implements RequestService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
 
-        if(user.getId().equals(event.getInitiator().getId())){
+        if (user.getId().equals(event.getInitiator().getId())) {
             throw new ConflictException("You cannot register for your own event.");
         }
 
-        if(!event.getState().equals(EventState.PUBLISHED)){
+        if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("You cannot register in an unpublished event.");
         }
 
-        int confirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-        if (event.getParticipantLimit() != 0 && confirmed >= event.getParticipantLimit()) {
+        if (event.getConfirmedRequests().equals(event.getParticipantLimit()) && event.getParticipantLimit() != 0) {
             throw new ConflictException("All spots are taken, registration is not possible.");
         }
 
@@ -54,10 +53,17 @@ public class RequestServiceImpl implements RequestService {
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
 
-        if(!event.getRequestModeration() || event.getParticipantLimit() == 0){
+        if (!event.getRequestModeration()) {
             request.setStatus(RequestStatus.CONFIRMED);
-        } else{
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+            eventRepository.save(event);
+
+        } else {
             request.setStatus(RequestStatus.PENDING);
+        }
+
+        if (event.getParticipantLimit() == 0) {
+            request.setStatus(RequestStatus.CONFIRMED);
         }
 
 

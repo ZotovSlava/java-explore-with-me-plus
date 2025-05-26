@@ -3,9 +3,7 @@ package ru.yandex.practicum.ewm.request.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.yandex.practicum.ewm.event.model.Event;
 import ru.yandex.practicum.ewm.request.model.RequestStatus;
-import ru.yandex.practicum.ewm.user.model.User;
 
 import java.time.LocalDateTime;
 

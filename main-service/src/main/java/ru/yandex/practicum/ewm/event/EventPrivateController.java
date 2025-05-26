@@ -67,9 +67,9 @@ public class EventPrivateController {
     public ResponseEntity<EventFullDto> update(@RequestBody @Valid EventUpdateUserDto eventUpdateDto,
                                                @PathVariable("userId") Long userId,
                                                @PathVariable("eventId") Long eventId) {
-        log.info("--> PATCH запрос /admin/events/{} с телом {}", eventId, eventUpdateDto);
+        log.info("--> PATCH запрос /users/{}/events/{} с телом {}", userId, eventId, eventUpdateDto);
         EventFullDto event = eventService.updatePrivate(userId, eventId, eventUpdateDto);
-        log.info("<-- PATCH запрос /admin/events/{} вернул ответ: {}", eventId, event);
+        log.info("<-- PATCH запрос /users/{}/events/{} вернул ответ: {}", userId, eventId, event);
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)

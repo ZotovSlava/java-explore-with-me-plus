@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.ewm.event.model.Location;
@@ -14,7 +13,6 @@ import ru.yandex.practicum.ewm.event.model.Location;
 import java.time.LocalDateTime;
 
 @Data
-@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventCreateDto {
@@ -28,10 +26,10 @@ public class EventCreateDto {
     @Size(max = 7000, min = 20, message = "Description length must be between 20 and 7000 characters")
     private String description;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created = LocalDateTime.now();
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @FutureOrPresent()
     private LocalDateTime eventDate;
 

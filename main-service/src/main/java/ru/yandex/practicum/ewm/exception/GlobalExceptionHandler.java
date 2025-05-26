@@ -79,6 +79,30 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(EventDateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleEventDateRequest(EventDateException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.name(),
+                "Incorrectly made request.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
+    @ExceptionHandler(EventsGetPublicBadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleEventsGetBadRequest(EventsGetPublicBadRequestException ex) {
+    return new ErrorResponse(
+            HttpStatus.BAD_REQUEST.name(),
+            "Incorrectly made request.",
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+    }
+
+
+
     @ExceptionHandler(CompilationNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleCompilationNotFound(CompilationNotFoundException ex) {

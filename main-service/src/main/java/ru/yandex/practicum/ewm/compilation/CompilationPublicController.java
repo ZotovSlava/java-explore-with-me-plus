@@ -16,11 +16,10 @@ public class CompilationPublicController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public  ResponseEntity<List<CompilationRequestDto>> get(
+    public ResponseEntity<List<CompilationRequestDto>> get(
             @RequestParam(defaultValue = "false") Boolean pinned,
             @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size
-    ){
+            @RequestParam(defaultValue = "10") int size) {
         List<CompilationRequestDto> compilations = compilationService.get(pinned, from, size);
 
         return ResponseEntity
