@@ -22,4 +22,17 @@ public class ErrorHandler {
         String stackTrace = sw.toString();
         return new ApiError(status, "Error ....", e.getMessage(), stackTrace);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBadRequest(final BadRequestException e) {
+        log.warn("400 {}", e.getMessage(), e);
+        return new ApiError(HttpStatus.BAD_REQUEST, "Invalid request", e.getMessage(), getStackTrace(e));
+    }
+
+    private String getStackTrace(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
+    }
 }
