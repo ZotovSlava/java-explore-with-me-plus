@@ -1,6 +1,7 @@
 package ru.practicum.client;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -35,7 +36,7 @@ public class StatRestClient {
 
 
     public List<StatsDto> getStats(String start, String end, List<String> uris, boolean unique) {
-        String url = UriComponentsBuilder.fromHttpUrl("/stats")
+        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:9090/stats")
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .queryParam("uris", uris != null && !uris.isEmpty() ? String.join(",", uris) : null)
